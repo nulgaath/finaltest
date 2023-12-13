@@ -43,6 +43,8 @@ public class MovingPlatformController : MonoBehaviour
     private float timer;
     private int currentPointIndex;
 
+    private bool isPlayerTouching = false;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -66,6 +68,12 @@ public class MovingPlatformController : MonoBehaviour
     void Update()
     {
         Move();
+
+        // Check if the player is touching the platform
+        if (isPlayerTouching)
+        {
+            StartCoroutine(ShrinkPlatformOverTime(2.0f));
+        }
     }
 
     void FixedUpdate()
@@ -123,6 +131,42 @@ public class MovingPlatformController : MonoBehaviour
                 // Movement
                 transform.position = Vector2.Lerp(startPoint, destinationPoint, timer);
                 break;
+        }
+    }
+
+    // New method to handle player collision
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Player"))
+        {
+            isPlayerTouching = true;
+        }
+    }
+
+    // New method to handle player leaving the platform
+    private void OnCollisionExit2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Player"))
+        {
+            isPlayerTouching = false;
+        }
+    }
+
+    // New method for shrinking the platform over time
+    private IEnumerator ShrinkPlatformOverTime(float duration)
+    {
+        float elapsedTime = 0.0f;
+        while (elapsedTime < duration)
+        {
+            // Shrink effect
+            float scaleFactor = Mathf.Lerp(maxScale, minScale, elapsedTime / duration);
+            transform.localScale = new Vector3(scaleFactor, scaleFactor, 1f);
+
+            // Increment elapsed time
+            elapsedTime += Time.deltaTime;
+
+            // Wait for the next frame
+            yield return null;
         }
     }
 }

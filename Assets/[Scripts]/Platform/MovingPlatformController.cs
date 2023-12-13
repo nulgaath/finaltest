@@ -37,6 +37,11 @@ public class MovingPlatformController : MonoBehaviour
     [Header("Platform Path Points")]
     public List<Transform> pathPoints;
 
+    [Header("Audio Properties")]
+    public AudioClip touchSound;
+    public AudioClip shrinkSound;
+    private AudioSource audioSource;
+
     private Vector2 startPoint;
     private Vector2 destinationPoint;
     private List<Vector2> pathList;
@@ -62,6 +67,13 @@ public class MovingPlatformController : MonoBehaviour
         pathList.Add(transform.position);
 
         destinationPoint = pathList[currentPointIndex];
+
+        // Initialize AudioSource component
+        audioSource = gameObject.GetComponent<AudioSource>();
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+        }
     }
 
     // Update is called once per frame
@@ -140,6 +152,12 @@ public class MovingPlatformController : MonoBehaviour
         if (collision.gameObject.CompareTag("Player"))
         {
             isPlayerTouching = true;
+
+            // Play touch sound
+            if (touchSound != null)
+            {
+                audioSource.PlayOneShot(touchSound);
+            }
         }
     }
 
@@ -168,6 +186,16 @@ public class MovingPlatformController : MonoBehaviour
             // Wait for the next frame
             yield return null;
         }
+
+        // Ensure the final scale is set to minScale
+        transform.localScale = new Vector3(minScale, minScale, 1f);
+
+        // Play shrink sound
+        if (shrinkSound != null)
+        {
+            audioSource.PlayOneShot(shrinkSound);
+        }
     }
 }
+
 
